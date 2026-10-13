@@ -4,7 +4,8 @@ import io.github.dekabrsky.androidMidSemester.data.repository.MatchRepositoryImp
 import io.github.dekabrsky.androidMidSemester.domain.repository.MatchRepository
 import org.koin.dsl.module
 import io.github.dekabrsky.androidMidSemester.data.cache.MatchCache
+import io.github.dekabrsky.androidMidSemester.data.repository.RepositoryImpl
 val repositoryModule = module {
     single { MatchCache() }
-    single<MatchRepository> { MatchRepositoryImpl(get(), get()) }
+    single<MatchRepository> { RepositoryImpl(get(), get()) }
 }
