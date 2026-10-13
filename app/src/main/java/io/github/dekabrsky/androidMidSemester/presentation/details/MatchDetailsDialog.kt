@@ -20,6 +20,11 @@ import io.github.dekabrsky.androidMidSemester.R
 import io.github.dekabrsky.androidMidSemester.domain.model.Match
 import io.github.dekabrsky.androidMidSemester.domain.model.MatchStatus
 import java.time.format.DateTimeFormatter
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
+import io.github.dekabrsky.androidMidSemester.domain.model.Team
+import java.util.Locale
 /**
  * ЗАДАНИЕ СТУДЕНТАМ (итерация 0): контент диалога деталей матча.
  *
@@ -43,46 +48,67 @@ fun MatchDetailsDialog(
     Card(modifier = Modifier.fillMaxWidth()) {
         Column(
             modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
+            Text(
+                text = match.league,
+                modifier = Modifier.align(Alignment.CenterHorizontally),
+                style = MaterialTheme.typography.titleMedium,
+            )
+
             Row(verticalAlignment = Alignment.CenterVertically) {
-                AsyncImage(
-                    model = match.home.logoUrl,
-                    contentDescription = match.home.name,
-                    modifier = Modifier.size(48.dp),
-                    placeholder = painterResource(R.drawable.ic_team_placeholder),
-                    error = painterResource(R.drawable.ic_team_placeholder),
-                )
-                Column(
-                    modifier = Modifier.weight(1f).padding(horizontal = 8.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
+                TeamInfo(match.home, Modifier.weight(1f))
+                if (match.status == MatchStatus.FINISHED &&
+                    match.homeScore != null && match.awayScore != null
                 ) {
-                    Text(match.home.name)
-                    Text(match.away.name)
+                    Text(
+                        text = "${match.homeScore} : ${match.awayScore}",
+                        modifier = Modifier.padding(horizontal = 12.dp),
+                        style = MaterialTheme.typography.headlineMedium,
+                    )
                 }
-                AsyncImage(
-                    model = match.away.logoUrl,
-                    contentDescription = match.away.name,
-                    modifier = Modifier.size(48.dp),
-                    placeholder = painterResource(R.drawable.ic_team_placeholder),
-                    error = painterResource(R.drawable.ic_team_placeholder),
-                )
+                TeamInfo(match.away, Modifier.weight(1f))
             }
-            if (match.status == MatchStatus.FINISHED &&
-                match.homeScore != null && match.awayScore != null
-            ) {
-                Text(
-                    text = "${match.homeScore} : ${match.awayScore}",
-                    modifier = Modifier.align(Alignment.CenterHorizontally),
-                    style = MaterialTheme.typography.titleLarge,
-                )
+            HorizontalDivider()
+            listOf(
+                "Начало" to match.kickoff.format(DateTimeFormatter.ofPattern("HH:mm")),
+                "Дата" to match.kickoff.format(
+                    DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.forLanguageTag("ru"))
+                ),
+                "Лига" to match.league,
+                "Тур" to match.round,
+                "Статус" to if (match.status == MatchStatus.FINISHED) "Завершён" else "Не сыгран",
+            ).forEach { (label, value) ->
+                Row(modifier = Modifier.fillMaxWidth()) {
+                    Text(label, modifier = Modifier.weight(1f))
+                    Text(value, modifier = Modifier.weight(2f), textAlign = TextAlign.End)
+                }
             }
-            Text("Время: ${match.kickoff.format(DateTimeFormatter.ofPattern("HH:mm"))}")
-            Text("Лига: ${match.league}")
-            Text("Тур: ${match.round}")
             TextButton(onClick = onDismiss, modifier = Modifier.align(Alignment.End)) {
                 Text("Закрыть")
             }
         }
+    }
+}
+@Composable
+private fun TeamInfo(team: Team, modifier: Modifier) {
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        AsyncImage(
+            model = team.logoUrl,
+            contentDescription = team.name,
+            modifier = Modifier.size(64.dp),
+            placeholder = painterResource(R.drawable.ic_team_placeholder),
+            error = painterResource(R.drawable.ic_team_placeholder),
+        )
+        Text(
+            text = team.name,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
+            textAlign = TextAlign.Center,
+        )
     }
 }
